@@ -8,8 +8,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.net.URI;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,6 +42,7 @@ class CashCardApplicationTests {
     }
 
     @Test
+    @DirtiesContext
     void shouldCreateANewCashCard() {
         CashCard newCashCard = new CashCard(null, 250.00);
         ResponseEntity<Void> createResponse = restTemplate.postForEntity("/cashcards", newCashCard, Void.class);
@@ -55,5 +58,23 @@ class CashCardApplicationTests {
 
         assertThat(id).isNotNull();
         assertThat(amount).isEqualTo(250.00);
+    }
+
+    @Test
+    void shouldReturnAllCashCards() {
+        ResponseEntity<String> getAllResponse = restTemplate.getForEntity("/cashcards", String.class);
+        assertThat(getAllResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        DocumentContext documentContext = JsonPath.parse(getAllResponse.getBody());
+        assertThat((Integer) documentContext.read("$.length()")).isEqualTo(3);
+
+        assertThat((Integer) documentContext.read("$[0].id")).isEqualTo(99);
+        assertThat((Double) documentContext.read("$[0].amount")).isEqualTo(123.45D);
+
+        assertThat((Integer) documentContext.read("$[1].id")).isEqualTo(100);
+        assertThat((Double) documentContext.read("$[1].amount")).isEqualTo(1D);
+
+        assertThat((Integer) documentContext.read("$[2].id")).isEqualTo(101);
+        assertThat((Double) documentContext.read("$[2].amount")).isEqualTo(150D);
     }
 }

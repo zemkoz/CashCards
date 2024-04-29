@@ -40,4 +40,10 @@ class CashCardController {
                 .created(locationOfNewCashCard)
                 .build();
     }
+
+    @GetMapping
+    ResponseEntity<Iterable<CashCard>> findAllCashCards() {
+        var cashCards = cashCardRepository.findAll();
+        return ResponseEntity.ok(cashCards);
+    }
 }

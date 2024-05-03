@@ -59,4 +59,21 @@ class CashCardController {
         var cashCards = cashCardRepository.findByOwner(principal.getName(), pageRequest);
         return ResponseEntity.ok(cashCards.getContent());
     }
+
+    @PutMapping("/{requestedId}")
+    ResponseEntity<Void> updateCashCard(@PathVariable Long requestedId,
+                                                @RequestBody CashCard cashCardUpdate,
+                                                Principal principal) {
+
+        Optional<CashCard> foundCashCard = cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
+        if (foundCashCard.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        CashCard updatedCashCard = new CashCard(foundCashCard.get().id(),
+                cashCardUpdate.amount(),
+                principal.getName());
+        cashCardRepository.save(updatedCashCard);
+        return ResponseEntity.noContent().build();
+    }
 }
